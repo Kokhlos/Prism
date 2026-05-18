@@ -97,10 +97,10 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
 .ref-pin-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:#ff3b30;border:2px solid #fff;box-shadow:0 0 6px rgba(0,0,0,.5);z-index:1;top:-5px;left:-5px}
 .prog-bar{height:3px;background:var(--brd);border-radius:2px;margin:12px 0;overflow:hidden}
 .prog-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:2px;transition:width .25s ease;width:0%}
-.results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;margin-top:16px}
+.results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;margin-top:16px;align-items:start}
 .res-item{background:var(--s2);border:1px solid var(--brd);border-radius:8px;overflow:hidden;transition:border-color .15s}
 .res-item:hover{border-color:var(--brd2)}
-.res-thumb{width:100%;display:block;aspect-ratio:9/16;object-fit:cover;background:#000}
+.res-thumb{width:100%;display:block;height:auto;background:#111;border-bottom:1px solid var(--brd)}
 .res-meta{padding:8px 10px}
 .res-name{font-size:10px;font-family:'DM Mono',monospace;color:var(--txt3);word-break:break-all;margin-bottom:6px;line-height:1.4}
 .btn-dl{width:100%;background:var(--s3);border:1px solid var(--brd);border-radius:4px;color:var(--txt2);font-size:11px;padding:5px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s}
@@ -163,6 +163,14 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
 .focal-xy input{width:56px;font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;text-align:center}
 .focal-active-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);text-align:center;margin-top:8px}
 .focal-active-label span{color:var(--acc2)}
+
+/* Collapsible cards */
+.card-head{cursor:pointer;margin-bottom:0;user-select:none}
+.card-head:hover .card-title{color:var(--acc2)}
+.card-chevron{margin-left:auto;color:var(--txt3);font-size:11px;transition:transform .25s ease;flex-shrink:0;width:18px;text-align:center}
+.card.collapsed .card-chevron{transform:rotate(-90deg)}
+.card-body{overflow:hidden;max-height:4000px;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .25s ease,padding .25s ease;padding-top:20px;opacity:1}
+.card.collapsed .card-body{max-height:0;opacity:0;padding-top:0;pointer-events:none}
 </style>
 <script>
 (function(){
@@ -948,6 +956,7 @@ function renderResults() {
     btn.onclick = () => { const a = document.createElement('a'); a.href = dataUrl; a.download = name; a.click(); };
     meta.append(nm, btn); item.append(thumb, meta); grid.appendChild(item);
   });
+  initCollapsible();
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -1206,6 +1215,41 @@ function showMsg(id, text, type) {
   $(id).innerHTML = `<div class="msg ${m[type]||'msg-inf'}">${text}</div>`;
 }
 function clearMsg(id) { $(id).innerHTML = ''; }
+
+/* ═══════ COLLAPSIBLE CARDS ═══════ */
+function initCollapsible() {
+  document.querySelectorAll('.card').forEach((card, idx) => {
+    const head = card.querySelector('.card-head');
+    if (!head || head.dataset.collapsible) return;
+    head.dataset.collapsible = '1';
+
+    // Wrap all siblings after head into card-body
+    const siblings = Array.from(card.children).filter(el => el !== head);
+    if (!siblings.length) return;
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    siblings.forEach(el => body.appendChild(el));
+    card.appendChild(body);
+
+    // Add chevron
+    const chev = document.createElement('span');
+    chev.className = 'card-chevron';
+    chev.innerHTML = '&#9660;';
+    head.appendChild(chev);
+
+    // Restore state
+    const key = 'prism_card_' + idx;
+    if (localStorage.getItem(key) === '0') card.classList.add('collapsed');
+
+    head.addEventListener('click', () => {
+      const nowCollapsed = card.classList.toggle('collapsed');
+      localStorage.setItem(key, nowCollapsed ? '0' : '1');
+    });
+  });
+}
+
+setTimeout(initCollapsible, 50);
+
 </script>
 </body>
 </html>
