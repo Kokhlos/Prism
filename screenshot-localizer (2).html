@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Screenshot Localizer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--bg:#0b0b10;--s1:#111118;--s2:#18181f;--s3:#1f1f28;--brd:#26262f;--brd2:#32323e;--acc:#6c63ff;--acc2:#8b83ff;--acc3:rgba(108,99,255,.12);--txt:#dcdce8;--txt2:#9898a8;--txt3:#62627a;--ok:#50d0a0;--err:#ff6b6b;--warn:#ffbe5c;--r:10px;--r2:6px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;font-size:14px;line-height:1.6;padding:0 0 100px}
+.header{padding:20px 36px;border-bottom:1px solid var(--brd);background:var(--s1);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:34px;height:34px;background:var(--acc);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px}
+h1{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:#fff}
+.version{font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3);background:var(--s3);border:1px solid var(--brd);padding:3px 8px;border-radius:4px}
+.main{max-width:860px;margin:0 auto;padding:28px 20px}
+.card{background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);padding:26px;margin-bottom:10px}
+.card-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.step{width:24px;height:24px;background:var(--acc);color:#fff;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:#fff}
+.card-sub{font-size:12px;color:var(--txt3);margin-top:1px}
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+label.lbl{display:block;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;color:var(--txt3);margin-bottom:6px}
+input[type=text],input[type=number],input[type=url],textarea,select{width:100%;background:var(--s2);border:1px solid var(--brd);border-radius:var(--r2);color:var(--txt);padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s,background .15s;appearance:none}
+input:focus,textarea:focus{border-color:var(--acc);background:var(--s3)}
+input[type=number]{font-family:'DM Mono',monospace}
+textarea{resize:vertical;min-height:90px;font-size:12px;font-family:'DM Mono',monospace;line-height:1.5}
+input[type=color]{width:36px;height:34px;padding:3px;border:1px solid var(--brd);border-radius:var(--r2);background:var(--s2);cursor:pointer;flex-shrink:0}
+input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:pointer;flex-shrink:0}
+.row{display:flex;gap:12px}
+.row>.field{flex:1;margin-bottom:0}
+.btn{background:var(--acc);color:#fff;border:none;border-radius:var(--r2);padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s,transform .1s;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;flex-shrink:0}
+.btn:hover{background:var(--acc2)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+.btn-ghost{background:var(--s2);color:var(--txt);border:1px solid var(--brd)}
+.btn-ghost:hover{background:var(--s3);border-color:var(--brd2)}
+.btn-big{padding:13px 28px;font-size:14px;font-weight:600;background:linear-gradient(135deg,var(--acc) 0%,#9b6cff 100%);border-radius:8px}
+.btn-big:hover{background:linear-gradient(135deg,var(--acc2) 0%,#ac80ff 100%)}
+.or{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--txt3);font-size:11px;font-family:'DM Mono',monospace}
+.or::before,.or::after{content:'';flex:1;height:1px;background:var(--brd)}
+
+/* Upload zone — fixed: now uses label wrapping for reliable click */
+.upload-zone{border:2px dashed var(--brd);border-radius:8px;padding:18px 20px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;display:block}
+.upload-zone:hover,.upload-zone.over{border-color:var(--acc);background:var(--acc3)}
+.uz-icon{font-size:22px;margin-bottom:4px}
+.uz-text{font-size:12px;color:var(--txt2)}
+.uz-text strong{color:var(--acc2)}
+.uz-hint{font-size:11px;color:var(--txt3);margin-top:2px}
+
+/* Hidden file inputs — triggered by buttons */
+.file-hidden{display:none}
+
+.file-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{background:var(--s2);border:1px solid var(--brd);border-radius:20px;padding:4px 10px 4px 6px;font-size:11px;color:var(--txt2);display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;max-width:240px;overflow:hidden}
+.chip-pfx{background:var(--acc);color:#fff;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;flex-shrink:0}
+.chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sec-sub{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);padding:8px 0;border-bottom:1px solid var(--brd);margin:20px 0 16px}
+.align-group{display:flex;border:1px solid var(--brd);border-radius:var(--r2);overflow:hidden}
+.align-btn{flex:1;padding:8px;background:var(--s2);border:none;color:var(--txt3);cursor:pointer;font-size:13px;transition:background .15s,color .15s;border-right:1px solid var(--brd);font-family:'DM Sans',sans-serif}
+.align-btn:last-child{border-right:none}
+.align-btn:hover{background:var(--s3);color:var(--txt)}
+.align-btn.on{background:var(--acc3);color:var(--acc2)}
+.color-row{display:flex;align-items:center;gap:8px}
+.color-row input[type=text]{flex:1;font-family:'DM Mono',monospace;font-size:12px}
+.msg{padding:10px 14px;border-radius:var(--r2);font-size:12px;margin-top:10px;line-height:1.6}
+.msg-ok{background:rgba(80,208,160,.1);color:var(--ok);border:1px solid rgba(80,208,160,.25)}
+.msg-err{background:rgba(255,107,107,.1);color:var(--err);border:1px solid rgba(255,107,107,.25)}
+.msg-inf{background:rgba(108,99,255,.1);color:var(--acc2);border:1px solid rgba(108,99,255,.25)}
+.msg-warn{background:rgba(255,190,92,.1);color:var(--warn);border:1px solid rgba(255,190,92,.25)}
+.hint-box{background:var(--s2);border:1px solid var(--brd);border-radius:8px;padding:14px 16px;margin-bottom:16px}
+.hint-box-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--txt2);margin-bottom:10px}
+.hint-steps{list-style:none;padding:0}
+.hint-steps li{display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--txt2);margin-bottom:7px;line-height:1.5}
+.hint-steps li:last-child{margin-bottom:0}
+.hint-n{width:20px;height:20px;border-radius:50%;background:var(--s3);border:1px solid var(--brd2);color:var(--acc2);font-family:'DM Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hint-steps code{background:var(--s3);border:1px solid var(--brd);border-radius:3px;padding:0 4px;font-family:'DM Mono',monospace;font-size:11px;color:var(--acc2)}
+.sheet-preview{margin-top:14px;overflow-x:auto;border:1px solid var(--brd);border-radius:8px}
+.sheet-preview table{border-collapse:collapse;min-width:100%;font-family:'DM Mono',monospace;font-size:11px}
+.sheet-preview th{background:var(--s3);color:var(--acc2);padding:6px 10px;text-align:left;border-bottom:1px solid var(--brd);border-right:1px solid var(--brd);white-space:nowrap}
+.sheet-preview td{padding:5px 10px;color:var(--txt2);border-bottom:1px solid var(--brd);border-right:1px solid var(--brd);white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.sheet-preview tr:last-child td{border-bottom:none}
+.sheet-preview .kc{color:var(--acc2);font-weight:700}
+.lang-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.lang-pill{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--brd);border-radius:6px;padding:7px 12px;cursor:pointer;transition:border-color .15s,background .15s;user-select:none;font-size:13px;font-weight:500}
+.lang-pill:hover{border-color:var(--brd2)}
+.lang-pill.on{border-color:var(--acc);background:var(--acc3);color:var(--acc2)}
+.lang-pill input{display:none}
+.ref-wrap{margin-top:16px;display:inline-block;position:relative;cursor:crosshair;border-radius:8px;overflow:hidden;border:1px solid var(--brd);background:#111;user-select:none;max-width:100%}
+.ref-wrap img{display:block;pointer-events:none}
+.ref-pin{position:absolute;transform:translate(-50%,-50%);pointer-events:none;width:0;height:0}
+.ref-pin::before{content:'';position:absolute;width:1px;height:28px;background:#ff3b30;left:0;top:-14px;box-shadow:0 0 4px rgba(255,59,48,.6)}
+.ref-pin::after{content:'';position:absolute;width:28px;height:1px;background:#ff3b30;left:-14px;top:0;box-shadow:0 0 4px rgba(255,59,48,.6)}
+.ref-pin-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:#ff3b30;border:2px solid #fff;box-shadow:0 0 6px rgba(0,0,0,.5);z-index:1;top:-5px;left:-5px}
+.prog-bar{height:3px;background:var(--brd);border-radius:2px;margin:12px 0;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:2px;transition:width .25s ease;width:0%}
+.results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;margin-top:16px}
+.res-item{background:var(--s2);border:1px solid var(--brd);border-radius:8px;overflow:hidden;transition:border-color .15s}
+.res-item:hover{border-color:var(--brd2)}
+.res-thumb{width:100%;display:block;aspect-ratio:9/16;object-fit:cover;background:#000}
+.res-meta{padding:8px 10px}
+.res-name{font-size:10px;font-family:'DM Mono',monospace;color:var(--txt3);word-break:break-all;margin-bottom:6px;line-height:1.4}
+.btn-dl{width:100%;background:var(--s3);border:1px solid var(--brd);border-radius:4px;color:var(--txt2);font-size:11px;padding:5px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s}
+.btn-dl:hover{background:var(--brd);color:var(--txt)}
+.inline-r{display:flex;gap:8px;align-items:flex-end}
+.inline-r input{flex:1}
+.check-field{display:flex;align-items:center;gap:8px;cursor:pointer}
+.check-field span{color:var(--txt2);font-size:13px}
+.lang-actions{display:flex;gap:6px;margin-bottom:10px}
+.btn-tiny{background:none;border:1px solid var(--brd);border-radius:4px;color:var(--txt3);font-size:11px;padding:3px 8px;cursor:pointer;font-family:'DM Mono',monospace;transition:border-color .15s,color .15s}
+.btn-tiny:hover{border-color:var(--brd2);color:var(--txt2)}
+.gen-area{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:16px}
+.gen-status{font-size:12px;color:var(--txt3);font-family:'DM Mono',monospace}
+.hidden{display:none!important}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+
+/* ref upload button row */
+.ref-upload-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.ref-name{font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)}
+/* Presets */
+.presets-wrap{background:var(--s2);border:1px solid var(--brd);border-radius:8px;padding:14px;margin-bottom:20px}
+.presets-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;color:var(--txt3);margin-bottom:10px}
+.preset-list{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.preset-item{display:flex;align-items:center;gap:8px;background:var(--s3);border:1px solid var(--brd);border-radius:6px;padding:7px 10px;transition:border-color .15s}
+.preset-item:hover{border-color:var(--brd2)}
+.preset-item-name{flex:1;font-size:13px;color:var(--txt);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preset-item-font{font-size:10px;font-family:'DM Mono',monospace;color:var(--txt3);flex-shrink:0;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preset-item-font.has-font{color:var(--ok)}
+.preset-load{background:var(--acc3);border:1px solid rgba(108,99,255,.3);color:var(--acc2);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s;flex-shrink:0;white-space:nowrap}
+.preset-load:hover{background:rgba(108,99,255,.25)}
+.preset-del{background:none;border:1px solid var(--brd);color:var(--txt3);border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;transition:color .15s,border-color .15s;flex-shrink:0}
+.preset-del:hover{color:var(--err);border-color:rgba(255,107,107,.5)}
+.preset-save-row{display:flex;gap:8px;align-items:center}
+.preset-save-row input{flex:1;font-size:12px}
+.preset-empty{font-size:12px;color:var(--txt3);font-family:'DM Mono',monospace;padding:2px 0}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🌍</div>
+    <h1>Screenshot Localizer</h1>
+  </div>
+  <span class="version">v1.2</span>
+</header>
+<main class="main">
+
+<!-- STEP 1 -->
+<div class="card">
+  <div class="card-head">
+    <div class="step">1</div>
+    <div>
+      <div class="card-title">Источник переводов</div>
+      <div class="card-sub">Вставьте данные из Google Sheets или загрузите через URL</div>
+    </div>
+  </div>
+  <div class="hint-box">
+    <div class="hint-box-title">📋 Как вставить данные из Google Sheets (рекомендуется)</div>
+    <ul class="hint-steps">
+      <li><div class="hint-n">1</div><span>Откройте таблицу → нажмите <code>Ctrl+A</code> (или <code>⌘+A</code>) чтобы выделить всё</span></li>
+      <li><div class="hint-n">2</div><span>Скопируйте: <code>Ctrl+C</code></span></li>
+      <li><div class="hint-n">3</div><span>Кликните в поле ниже и вставьте: <code>Ctrl+V</code> → нажмите <b>Применить</b></span></li>
+      <li><div class="hint-n">—</div><span style="color:var(--txt3)">Числа в первой колонке (1, 2, 3…) — ключи для сопоставления со скриншотами. Определяется автоматически.</span></li>
+    </ul>
+  </div>
+  <div class="field">
+    <label class="lbl">Вставьте данные (TSV из Sheets — Ctrl+A → Ctrl+C → Ctrl+V)</label>
+    <textarea id="csv-paste" rows="6" placeholder="Вставьте ячейки из Google Sheets…"></textarea>
+  </div>
+  <button class="btn" onclick="parseManual()">✓ Применить данные</button>
+  <div class="or">или загрузите через URL</div>
+  <div class="field">
+    <label class="lbl">URL Google Таблицы</label>
+    <div class="inline-r">
+      <input type="url" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/d/…/edit">
+      <button class="btn btn-ghost" onclick="fetchSheet()">Загрузить</button>
+    </div>
+    <div id="url-msg"></div>
+  </div>
+  <div id="sheet-status"></div>
+  <div id="sheet-preview-wrap"></div>
+</div>
+
+<!-- STEP 2 -->
+<div class="card">
+  <div class="card-head">
+    <div class="step">2</div>
+    <div>
+      <div class="card-title">Шрифт и параметры текста</div>
+      <div class="card-sub">TTF/OTF + стиль, обводка, тень</div>
+    </div>
+  </div>
+  <!-- PRESETS -->
+  <div class="presets-wrap">
+    <div class="presets-title">💾 Пресеты</div>
+    <div class="preset-list" id="preset-list"><div class="preset-empty">Нет сохранённых пресетов</div></div>
+    <div class="preset-save-row">
+      <input type="text" id="preset-name-input" placeholder="Название нового пресета…" maxlength="40">
+      <button class="btn btn-ghost" style="flex-shrink:0;" onclick="savePreset()">💾 Сохранить</button>
+    </div>
+    <div id="preset-msg"></div>
+  </div>
+
+  <div class="field">
+    <label class="lbl">Файл шрифта (.ttf / .otf / .woff / .woff2)</label>
+    <!-- FIXED: button triggers hidden input — no z-index/positioning bugs -->
+    <input type="file" id="font-input" class="file-hidden" accept=".ttf,.otf,.woff,.woff2" onchange="loadFont(this)">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('font-input').click()">📂 Выбрать шрифт</button>
+      <span id="font-name" style="font-size:12px;color:var(--txt3);font-family:'DM Mono',monospace;"></span>
+    </div>
+    <div id="font-status"></div>
+  </div>
+  <div class="row">
+    <div class="field">
+      <label class="lbl">Размер (px)</label>
+      <input type="number" id="fs-size" value="36" min="6" max="400">
+    </div>
+    <div class="field">
+      <label class="lbl">Жирность</label>
+      <select id="fs-weight">
+        <option value="300">Light 300</option>
+        <option value="400" selected>Regular 400</option>
+        <option value="500">Medium 500</option>
+        <option value="600">SemiBold 600</option>
+        <option value="700">Bold 700</option>
+        <option value="800">ExtraBold 800</option>
+        <option value="900">Black 900</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="lbl">Цвет текста</label>
+      <div class="color-row">
+        <input type="color" id="fc-color" value="#ffffff">
+        <input type="text" id="fc-hex" value="#ffffff" maxlength="9">
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="field">
+      <label class="lbl">Выравнивание</label>
+      <div class="align-group">
+        <button class="align-btn" data-a="left" onclick="setAlign('left')">⬅ Лево</button>
+        <button class="align-btn on" data-a="center" onclick="setAlign('center')">≡ Центр</button>
+        <button class="align-btn" data-a="right" onclick="setAlign('right')">Право ➡</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="lbl">Макс. ширина (px, 0=авто)</label>
+      <input type="number" id="fs-maxw" value="0" min="0">
+    </div>
+    <div class="field">
+      <label class="lbl">Межстрочный</label>
+      <input type="number" id="fs-lh" value="1.3" min="0.5" max="5" step="0.1">
+    </div>
+  </div>
+  <div class="sec-sub">Обводка (Stroke)</div>
+  <div class="row">
+    <div class="field">
+      <label class="lbl">Толщина (px)</label>
+      <input type="number" id="st-w" value="0" min="0" max="60">
+    </div>
+    <div class="field">
+      <label class="lbl">Цвет обводки</label>
+      <div class="color-row">
+        <input type="color" id="st-color" value="#000000">
+        <input type="text" id="st-hex" value="#000000" maxlength="9">
+      </div>
+    </div>
+  </div>
+  <div class="sec-sub">Тень (Drop Shadow)</div>
+  <div class="field">
+    <label class="check-field">
+      <input type="checkbox" id="sh-on" checked>
+      <span>Включить тень</span>
+    </label>
+  </div>
+  <div id="sh-settings">
+    <div class="row" style="margin-bottom:12px;">
+      <div class="field">
+        <label class="lbl">Цвет тени</label>
+        <div class="color-row">
+          <input type="color" id="sh-color" value="#000000">
+          <input type="text" id="sh-hex" value="#000000" maxlength="9">
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Непрозрачность %</label>
+        <input type="number" id="sh-opacity" value="75" min="0" max="100">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field"><label class="lbl">Смещение X</label><input type="number" id="sh-x" value="2"></div>
+      <div class="field"><label class="lbl">Смещение Y</label><input type="number" id="sh-y" value="2"></div>
+      <div class="field"><label class="lbl">Размытие (blur)</label><input type="number" id="sh-blur" value="6" min="0"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="card">
+  <div class="card-head">
+    <div class="step">3</div>
+    <div>
+      <div class="card-title">Скриншоты</div>
+      <div class="card-sub">Имя файла начинается с числа = ключ строки в таблице</div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--txt3);margin-bottom:14px;font-family:'DM Mono',monospace;line-height:1.9;">
+    <span style="color:var(--acc2)">1_1080x1920.png</span> → строка с ключом 1 &nbsp;·&nbsp;
+    <span style="color:var(--acc2)">2_home.png</span> → ключ 2 &nbsp;·&nbsp;
+    <span style="color:var(--acc2)">3_features.png</span> → ключ 3
+  </div>
+  <!-- FIXED: button triggers hidden input -->
+  <input type="file" id="ss-input" class="file-hidden" accept="image/png,image/jpeg,image/webp" multiple onchange="loadScreenshots(this)">
+  <button class="btn btn-ghost" onclick="document.getElementById('ss-input').click()">🖼️ Выбрать скриншоты (мультивыбор)</button>
+  <div class="file-list" id="ss-list"></div>
+</div>
+
+<!-- STEP 4 -->
+<div class="card">
+  <div class="card-head">
+    <div class="step">4</div>
+    <div>
+      <div class="card-title">Позиция текста</div>
+      <div class="card-sub">Загрузите любой скриншот и кликните — точка вставки текста</div>
+    </div>
+  </div>
+  <!-- FIXED: button triggers hidden input — guaranteed to work -->
+  <input type="file" id="ref-input" class="file-hidden" accept="image/*" onchange="loadRef(this)">
+  <div class="ref-upload-row">
+    <button class="btn btn-ghost" onclick="document.getElementById('ref-input').click()">📌 Выбрать референс</button>
+    <span class="ref-name" id="ref-name"></span>
+  </div>
+  <div id="ref-pos-info" class="hidden" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3);margin-top:8px;">
+    Точка вставки: <span id="ref-pos" style="color:var(--acc2)">—</span>
+  </div>
+  <div id="ref-preview"></div>
+  <div id="ref-hint" class="hidden" style="margin-top:8px;font-size:11px;color:var(--txt3);font-family:'DM Mono',monospace;">
+    Кликните по изображению, чтобы переставить точку
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div class="card">
+  <div class="card-head">
+    <div class="step">5</div>
+    <div>
+      <div class="card-title">Генерация</div>
+      <div class="card-sub">Выберите языки и запустите</div>
+    </div>
+  </div>
+  <div class="field">
+    <label class="lbl" style="margin-bottom:8px;">Языки для генерации</label>
+    <div class="lang-actions" id="lang-actions" style="display:none;">
+      <button class="btn-tiny" onclick="selAllLangs(true)">Все</button>
+      <button class="btn-tiny" onclick="selAllLangs(false)">Снять всё</button>
+    </div>
+    <div class="lang-grid" id="lang-grid">
+      <div style="color:var(--txt3);font-size:12px;">Загрузите данные из таблицы (шаг 1)</div>
+    </div>
+  </div>
+  <div class="prog-bar hidden" id="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  <div class="gen-area">
+    <button class="btn btn-big" onclick="generateAll()" id="gen-btn">▶ Сгенерировать</button>
+    <div class="gen-status" id="gen-status"></div>
+  </div>
+  <div id="gen-msg"></div>
+</div>
+
+<!-- STEP 6 -->
+<div class="card hidden" id="results-card">
+  <div class="card-head">
+    <div class="step">6</div>
+    <div>
+      <div class="card-title">Результаты</div>
+      <div class="card-sub" id="results-count"></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+    <button class="btn" onclick="downloadZip()">⬇ Скачать всё (ZIP)</button>
+    <span style="font-size:11px;color:var(--txt3);">или скачайте каждый файл отдельно ниже</span>
+  </div>
+  <div class="results-grid" id="results-grid"></div>
+</div>
+
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+/* ═══════ STATE ═══════ */
+const S = {
+  sheetData: null, languages: [], keyMap: new Map(), hasKeyCol: false, langOffset: 0,
+  fontLoaded: false, fontName: null,
+  textAlign: 'center',
+  screenshots: new Map(),   // prefix -> [{name, dataUrl}]
+  textPos: { x: 0.5, y: 0.5 },
+  selectedLangs: new Set(),
+  results: []
+};
+
+function $(id) { return document.getElementById(id); }
+
+/* ═══════ COLOR SYNC ═══════ */
+function syncC(ci, hi) {
+  const c = $(ci), h = $(hi);
+  c.addEventListener('input', () => h.value = c.value);
+  h.addEventListener('input', () => { if (/^#[0-9a-fA-F]{6}$/.test(h.value.trim())) c.value = h.value.trim(); });
+}
+syncC('fc-color','fc-hex'); syncC('st-color','st-hex'); syncC('sh-color','sh-hex');
+$('sh-on').addEventListener('change', function() { $('sh-settings').style.display = this.checked ? '' : 'none'; });
+function setAlign(a) { S.textAlign = a; document.querySelectorAll('.align-btn').forEach(b => b.classList.toggle('on', b.dataset.a === a)); }
+
+/* ═══════ FILE → DATA URL (FIXED: FileReader, no createObjectURL issues) ═══════ */
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = () => reject(new Error('Не удалось прочитать файл: ' + file.name));
+    reader.readAsDataURL(file);
+  });
+}
+
+function dataUrlToImage(dataUrl, name) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Не удалось декодировать изображение: ' + (name || '')));
+    img.src = dataUrl;
+  });
+}
+
+/* ═══════ CSV PARSER ═══════ */
+function parseCSV(text) {
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const fl = text.split('\n')[0];
+  const sep = (fl.match(/\t/g)||[]).length >= (fl.match(/,/g)||[]).length ? '\t' : ',';
+  const rows = []; let row = [], field = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"' && text[i+1] === '"') { field += '"'; i++; }
+      else if (c === '"') inQ = false;
+      else field += c;
+    } else {
+      if (c === '"') inQ = true;
+      else if (c === sep) { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); field = ''; if (row.some(x => x.trim())) rows.push(row); row = []; }
+      else field += c;
+    }
+  }
+  row.push(field); if (row.some(x => x.trim())) rows.push(row);
+  return rows;
+}
+
+function applySheet(data) {
+  if (!data || data.length < 2) return showMsg('sheet-status', 'Данные пустые или только заголовок', 'err');
+  const header = data[0];
+  const col0 = (header[0] || '').trim().toLowerCase();
+  const col0IsKey = col0 === '' || col0 === '#' || col0 === 'key' || col0 === 'id' || col0 === '№' ||
+    data.slice(1).every(r => (r[0]||'').trim() === '' || /^\d+$/.test((r[0]||'').trim()));
+  S.hasKeyCol = col0IsKey;
+  S.langOffset = col0IsKey ? 1 : 0;
+  S.sheetData = data;
+  S.languages = header.slice(S.langOffset).map(h => h.trim()).filter(Boolean);
+  S.keyMap.clear();
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const key = col0IsKey ? (row[0]||'').trim() : String(i);
+    if (key) S.keyMap.set(key, row);
+  }
+  renderLangs();
+  renderPreview(data, col0IsKey);
+  showMsg('sheet-status', `✓ Загружено: ${data.length-1} строк · ${S.languages.length} языков · ключ-колонка: ${col0IsKey ? 'ДА (A)' : 'НЕТ'} · Языки: ${S.languages.join(' · ')}`, 'ok');
+}
+
+function renderPreview(data, hasKey) {
+  const wrap = $('sheet-preview-wrap');
+  const maxC = Math.min(data[0].length, 7), maxR = Math.min(data.length, 6);
+  let h = '<div class="sheet-preview"><table><thead><tr>';
+  for (let c = 0; c < maxC; c++) h += `<th${c===0&&hasKey?' class="kc"':''}>${data[0][c]||'(ключ)'}</th>`;
+  if (data[0].length > maxC) h += `<th style="color:var(--txt3)">+${data[0].length-maxC}</th>`;
+  h += '</tr></thead><tbody>';
+  for (let r = 1; r < maxR; r++) {
+    h += '<tr>';
+    for (let c = 0; c < maxC; c++) h += `<td${c===0&&hasKey?' class="kc"':''}>${escHtml(data[r][c]||'')}</td>`;
+    if (data[0].length > maxC) h += '<td>…</td>';
+    h += '</tr>';
+  }
+  if (data.length > maxR) h += `<tr><td colspan="${maxC+(data[0].length>maxC?1:0)}" style="color:var(--txt3);text-align:center;padding:6px;">… ещё ${data.length-maxR} строк</td></tr>`;
+  wrap.innerHTML = h + '</tbody></table></div>';
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function fetchSheet() {
+  const url = $('sheet-url').value.trim(); if (!url) return;
+  showMsg('url-msg', 'Загрузка…', 'inf');
+  try {
+    const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    if (!m) throw new Error('Неверный URL Google Sheets');
+    const gm = url.match(/gid=(\d+)/);
+    const csvUrl = `https://docs.google.com/spreadsheets/d/${m[1]}/export?format=csv&gid=${gm?gm[1]:'0'}`;
+    let text = '', via = '';
+    try { const r = await fetch(csvUrl); if (!r.ok) throw 0; text = await r.text(); via = 'напрямую'; }
+    catch {
+      try { const r2 = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`); if (!r2.ok) throw 0; text = await r2.text(); via = 'через прокси'; }
+      catch {
+        $('url-msg').innerHTML = `<div class="msg msg-warn"><b>Автозагрузка заблокирована браузером (CORS).</b><br>Используйте ручной способ: откройте таблицу → <b>Ctrl+A → Ctrl+C</b> → вставьте выше → <b>Применить</b></div>`;
+        return;
+      }
+    }
+    $('url-msg').innerHTML = `<div class="msg msg-ok">✓ Загружено ${via}</div>`;
+    applySheet(parseCSV(text));
+  } catch(e) { showMsg('url-msg', e.message, 'err'); }
+}
+
+function parseManual() {
+  const text = $('csv-paste').value.trim();
+  if (!text) return showMsg('sheet-status', 'Поле пустое — вставьте данные', 'err');
+  applySheet(parseCSV(text));
+}
+
+/* ═══════ FONT ═══════ */
+async function loadFont(input) {
+  const file = input.files[0]; if (!file) return;
+  $('font-name').textContent = file.name;
+  const st = $('font-status'); st.innerHTML = '<div class="msg msg-inf">Загрузка шрифта…</div>';
+  try {
+    const buf = await file.arrayBuffer();
+    const name = 'SLF_' + Date.now();
+    const ff = new FontFace(name, buf);
+    await ff.load(); document.fonts.add(ff);
+    S.fontLoaded = true; S.fontName = name;
+    st.innerHTML = `<div class="msg msg-ok">✓ Шрифт загружен: ${file.name}</div>`;
+  } catch(e) { st.innerHTML = `<div class="msg msg-err">Ошибка: ${e.message}</div>`; }
+}
+
+/* ═══════ SCREENSHOTS — FIXED: store dataUrl, not File ═══════ */
+function getPrefix(fn) { const b = fn.replace(/\.[^/.]+$/, ''); const m = b.match(/^(\d+)/); return m ? m[1] : b.split('_')[0]; }
+
+async function loadScreenshots(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  S.screenshots.clear();
+  $('ss-list').innerHTML = '<div style="color:var(--txt3);font-size:11px;font-family:\'DM Mono\',monospace;">Загрузка…</div>';
+
+  for (const f of files) {
+    try {
+      const dataUrl = await fileToDataUrl(f);
+      const pfx = getPrefix(f.name);
+      if (!S.screenshots.has(pfx)) S.screenshots.set(pfx, []);
+      S.screenshots.get(pfx).push({ name: f.name, dataUrl });
+    } catch(e) { console.warn('Не удалось загрузить:', f.name, e); }
+  }
+
+  const list = $('ss-list'); list.innerHTML = '';
+  for (const [pfx, items] of S.screenshots) {
+    items.forEach(item => {
+      const chip = document.createElement('div'); chip.className = 'chip';
+      chip.innerHTML = `<span class="chip-pfx">${pfx}</span><span class="chip-name" title="${item.name}">${item.name}</span>`;
+      list.appendChild(chip);
+    });
+  }
+}
+
+/* ═══════ REFERENCE IMAGE — FIXED: FileReader + button trigger ═══════ */
+async function loadRef(input) {
+  const file = input.files[0]; if (!file) return;
+  $('ref-name').textContent = file.name;
+
+  try {
+    const dataUrl = await fileToDataUrl(file);
+    const img = await dataUrlToImage(dataUrl, file.name);
+
+    const scale = Math.min(700 / img.naturalWidth, 460 / img.naturalHeight, 1);
+    const dW = Math.round(img.naturalWidth * scale);
+    const dH = Math.round(img.naturalHeight * scale);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'ref-wrap';
+    wrap.style.width = dW + 'px';
+    wrap.style.height = dH + 'px';
+
+    const disp = document.createElement('img');
+    disp.src = dataUrl;        // data URL — no revocation issues
+    disp.width = dW;
+    disp.height = dH;
+    disp.draggable = false;
+
+    const pin = document.createElement('div');
+    pin.className = 'ref-pin hidden'; pin.id = 'ref-pin';
+    pin.innerHTML = '<div class="ref-pin-dot"></div>';
+
+    wrap.append(disp, pin);
+
+    wrap.addEventListener('click', e => {
+      const r = wrap.getBoundingClientRect();
+      const rx = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      const ry = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
+      S.textPos = { x: rx, y: ry };
+      pin.style.left = (rx * 100) + '%';
+      pin.style.top  = (ry * 100) + '%';
+      pin.classList.remove('hidden');
+      const px = Math.round(rx * img.naturalWidth);
+      const py = Math.round(ry * img.naturalHeight);
+      $('ref-pos').textContent = `X:${px} Y:${py}px  (${Math.round(rx*100)}% ${Math.round(ry*100)}%)`;
+      $('ref-pos-info').classList.remove('hidden');
+    });
+
+    const prev = $('ref-preview'); prev.innerHTML = '';
+    prev.appendChild(wrap);
+    $('ref-hint').classList.remove('hidden');
+  } catch(e) {
+    showMsg('ref-preview', 'Ошибка загрузки референса: ' + e.message, 'err');
+  }
+}
+
+/* ═══════ LANGS ═══════ */
+function renderLangs() {
+  const grid = $('lang-grid'); grid.innerHTML = '';
+  $('lang-actions').style.display = S.languages.length ? '' : 'none';
+  S.languages.forEach(lang => {
+    const pill = document.createElement('label');
+    pill.className = 'lang-pill' + (S.selectedLangs.has(lang) ? ' on' : '');
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = S.selectedLangs.has(lang);
+    cb.addEventListener('change', () => { if (cb.checked) { S.selectedLangs.add(lang); pill.classList.add('on'); } else { S.selectedLangs.delete(lang); pill.classList.remove('on'); } });
+    pill.append(cb, document.createTextNode(lang));
+    grid.appendChild(pill);
+  });
+}
+function selAllLangs(v) { if (v) S.languages.forEach(l => S.selectedLangs.add(l)); else S.selectedLangs.clear(); renderLangs(); }
+
+/* ═══════ TEXT RENDERING ═══════ */
+function wrapText(ctx, text, maxW) {
+  const paras = (text || '').replace(/\\n/g, '\n').split('\n');
+  if (!maxW || maxW <= 0) return paras;
+  const lines = [];
+  paras.forEach(para => {
+    if (!para) { lines.push(''); return; }
+    const words = para.split(' '); let cur = '';
+    words.forEach(w => { const t = cur ? cur + ' ' + w : w; if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; });
+    if (cur) lines.push(cur);
+  });
+  return lines;
+}
+
+function hexToRgba(hex, a) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function getSettings() {
+  const shOn = $('sh-on').checked;
+  return {
+    size:    parseInt($('fs-size').value)  || 36,
+    weight:  $('fs-weight').value          || '400',
+    color:   $('fc-color').value,
+    align:   S.textAlign,
+    maxW:    parseInt($('fs-maxw').value)  || 0,
+    lh:      parseFloat($('fs-lh').value)  || 1.3,
+    strokeW: parseInt($('st-w').value)     || 0,
+    strokeC: $('st-color').value,
+    shOn,
+    shC:    hexToRgba($('sh-color').value, parseInt($('sh-opacity').value) / 100),
+    shX:    parseInt($('sh-x').value)    || 0,
+    shY:    parseInt($('sh-y').value)    || 0,
+    shB:    parseInt($('sh-blur').value) || 0,
+  };
+}
+
+function drawText(ctx, text, x, y, s) {
+  const ff = S.fontLoaded ? `"${S.fontName}"` : '"Helvetica Neue",Arial,sans-serif';
+  ctx.font = `${s.weight} ${s.size}px ${ff}`;
+  ctx.textAlign = s.align;
+  ctx.textBaseline = 'middle';
+  const lines = wrapText(ctx, text, s.maxW);
+  const lh = s.size * s.lh;
+  const sy = y - ((lines.length - 1) * lh) / 2;
+  lines.forEach((line, i) => {
+    const ly = sy + i * lh;
+    if (s.strokeW > 0) {
+      ctx.save();
+      ctx.shadowColor = 'transparent';
+      ctx.lineWidth = s.strokeW * 2; ctx.strokeStyle = s.strokeC;
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.strokeText(line, x, ly);
+      ctx.restore();
+    }
+    ctx.save();
+    if (s.shOn) { ctx.shadowColor = s.shC; ctx.shadowOffsetX = s.shX; ctx.shadowOffsetY = s.shY; ctx.shadowBlur = s.shB; }
+    ctx.fillStyle = s.color;
+    ctx.fillText(line, x, ly);
+    ctx.restore();
+  });
+}
+
+/* ═══════ GENERATE — FIXED: uses stored dataUrl, no File access issues ═══════ */
+async function generateAll() {
+  clearMsg('gen-msg');
+  if (!S.sheetData || S.sheetData.length < 2) return showMsg('gen-msg', 'Загрузите данные из таблицы (шаг 1)', 'err');
+  if (S.screenshots.size === 0) return showMsg('gen-msg', 'Загрузите скриншоты (шаг 3)', 'err');
+  if (S.selectedLangs.size === 0) return showMsg('gen-msg', 'Выберите хотя бы один язык', 'err');
+
+  const settings = getSettings();
+  const langs = Array.from(S.selectedLangs);
+  const tasks = [];
+  const skipped = [];
+
+  for (const [pfx, items] of S.screenshots) {
+    const dataRow = S.keyMap.get(pfx) || S.keyMap.get(String(parseInt(pfx)));
+    if (!dataRow) { skipped.push(pfx); continue; }
+    for (const item of items) {
+      for (const lang of langs) {
+        const li = S.languages.indexOf(lang); if (li < 0) continue;
+        const text = (dataRow[S.langOffset + li] || '').replace(/\\n/g, '\n');
+        const base = item.name.replace(/\.[^/.]+$/, '');
+        tasks.push({ dataUrl: item.dataUrl, name: item.name, text, lang, outName: `${base}_${lang}.png` });
+      }
+    }
+  }
+
+  if (!tasks.length) {
+    const keys = Array.from(S.keyMap.keys()).join(', ');
+    const pfxs = Array.from(S.screenshots.keys()).join(', ');
+    return showMsg('gen-msg', `Нет совпадений. Ключи в таблице: [${keys}] · Префиксы файлов: [${pfxs}]`, 'err');
+  }
+
+  const progBar = $('prog-bar'), progFill = $('prog-fill'), genStatus = $('gen-status'), genBtn = $('gen-btn');
+  progBar.classList.remove('hidden'); genBtn.disabled = true; S.results = [];
+  const errors = [];
+
+  for (let i = 0; i < tasks.length; i++) {
+    const t = tasks[i];
+    try {
+      // Load image from stored data URL — always works, no File API issues
+      const img = await dataUrlToImage(t.dataUrl, t.name);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width; canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas context недоступен');
+      ctx.drawImage(img, 0, 0);
+      drawText(ctx, t.text, S.textPos.x * img.width, S.textPos.y * img.height, settings);
+      S.results.push({ name: t.outName, canvas, lang: t.lang });
+    } catch(e) {
+      errors.push(`${t.name}: ${e.message}`);
+      console.error('Ошибка генерации:', t.name, e);
+    }
+    progFill.style.width = Math.round(((i+1) / tasks.length) * 100) + '%';
+    genStatus.textContent = `${i+1} / ${tasks.length}`;
+    await new Promise(r => setTimeout(r, 0));
+  }
+
+  genBtn.disabled = false;
+  genStatus.textContent = `Готово: ${S.results.length} из ${tasks.length}`;
+
+  if (errors.length) showMsg('gen-msg', 'Ошибки: ' + errors.join('; '), 'warn');
+  if (skipped.length) {
+    const el = $('gen-msg');
+    el.innerHTML += `<div class="msg msg-warn" style="margin-top:6px;">Пропущено (нет ключа в таблице): ${skipped.join(', ')}</div>`;
+  }
+  if (S.results.length > 0) renderResults();
+}
+
+function renderResults() {
+  const card = $('results-card'), grid = $('results-grid');
+  card.classList.remove('hidden'); grid.innerHTML = '';
+  $('results-count').textContent = `${S.results.length} изображений`;
+  S.results.forEach(({ name, canvas }) => {
+    const dataUrl = canvas.toDataURL('image/png');
+    const item = document.createElement('div'); item.className = 'res-item';
+    const thumb = document.createElement('img'); thumb.className = 'res-thumb'; thumb.src = dataUrl; thumb.alt = name;
+    const meta = document.createElement('div'); meta.className = 'res-meta';
+    const nm = document.createElement('div'); nm.className = 'res-name'; nm.textContent = name; nm.title = name;
+    const btn = document.createElement('button'); btn.className = 'btn-dl'; btn.textContent = '⬇ Скачать';
+    btn.onclick = () => { const a = document.createElement('a'); a.href = dataUrl; a.download = name; a.click(); };
+    meta.append(nm, btn); item.append(thumb, meta); grid.appendChild(item);
+  });
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function downloadZip() {
+  if (!S.results.length) return;
+  const zip = new JSZip();
+  for (const { name, canvas, lang } of S.results) {
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    zip.folder(lang).file(name, blob);
+  }
+  const content = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(content);
+  const a = document.createElement('a'); a.href = url; a.download = 'localized_screenshots.zip'; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+/* ═══════ PRESETS (localStorage) ═══════ */
+const PRESET_KEY = 'sl_presets_v1';
+
+function loadPresetsFromStorage() {
+  try { return JSON.parse(localStorage.getItem(PRESET_KEY) || '[]'); } catch { return []; }
+}
+
+function savePresetsToStorage(presets) {
+  localStorage.setItem(PRESET_KEY, JSON.stringify(presets));
+}
+
+function renderPresetsList() {
+  const presets = loadPresetsFromStorage();
+  const list = $('preset-list');
+  if (!presets.length) {
+    list.innerHTML = '<div class="preset-empty">Нет сохранённых пресетов</div>';
+    return;
+  }
+  list.innerHTML = '';
+  presets.forEach((p, idx) => {
+    const item = document.createElement('div'); item.className = 'preset-item';
+    const name = document.createElement('div'); name.className = 'preset-item-name'; name.textContent = p.name; name.title = p.name;
+    const fontTag = document.createElement('div');
+    fontTag.className = 'preset-item-font' + (p.fontData ? ' has-font' : '');
+    fontTag.textContent = p.fontFileName ? (p.fontData ? '🔤 ' + p.fontFileName : '⚠ ' + p.fontFileName) : '— без шрифта';
+    fontTag.title = p.fontData ? 'Шрифт сохранён' : 'Шрифт не сохранён (превышен лимит), нужно выбрать вручную';
+    const loadBtn = document.createElement('button'); loadBtn.className = 'preset-load'; loadBtn.textContent = 'Применить';
+    loadBtn.onclick = () => applyPreset(idx);
+    const delBtn = document.createElement('button'); delBtn.className = 'preset-del'; delBtn.textContent = '✕';
+    delBtn.title = 'Удалить пресет';
+    delBtn.onclick = () => deletePreset(idx);
+    item.append(name, fontTag, loadBtn, delBtn);
+    list.appendChild(item);
+  });
+}
+
+function getCurrentSettingsObj() {
+  return {
+    size:      $('fs-size').value,
+    weight:    $('fs-weight').value,
+    color:     $('fc-color').value,
+    colorHex:  $('fc-hex').value,
+    align:     S.textAlign,
+    maxW:      $('fs-maxw').value,
+    lh:        $('fs-lh').value,
+    strokeW:   $('st-w').value,
+    strokeC:   $('st-color').value,
+    strokeHex: $('st-hex').value,
+    shOn:      $('sh-on').checked,
+    shColor:   $('sh-color').value,
+    shHex:     $('sh-hex').value,
+    shOpacity: $('sh-opacity').value,
+    shX:       $('sh-x').value,
+    shY:       $('sh-y').value,
+    shB:       $('sh-blur').value,
+  };
+}
+
+function applySettingsObj(s) {
+  $('fs-size').value    = s.size;
+  $('fs-weight').value  = s.weight;
+  $('fc-color').value   = s.color;    $('fc-hex').value   = s.colorHex  || s.color;
+  $('fs-maxw').value    = s.maxW;
+  $('fs-lh').value      = s.lh;
+  $('st-w').value       = s.strokeW;
+  $('st-color').value   = s.strokeC;  $('st-hex').value   = s.strokeHex || s.strokeC;
+  $('sh-on').checked    = s.shOn;     $('sh-settings').style.display = s.shOn ? '' : 'none';
+  $('sh-color').value   = s.shColor;  $('sh-hex').value   = s.shHex    || s.shColor;
+  $('sh-opacity').value = s.shOpacity;
+  $('sh-x').value       = s.shX;
+  $('sh-y').value       = s.shY;
+  $('sh-blur').value    = s.shB;
+  setAlign(s.align || 'center');
+}
+
+async function savePreset() {
+  const nameVal = $('preset-name-input').value.trim();
+  if (!nameVal) return showMsg('preset-msg', 'Введите название пресета', 'warn');
+
+  const settings = getCurrentSettingsObj();
+  let fontData = null, fontFileName = null;
+
+  // Try to read font file if loaded
+  const fontInput = $('font-input');
+  if (fontInput.files && fontInput.files[0]) {
+    fontFileName = fontInput.files[0].name;
+    try { fontData = await fileToDataUrl(fontInput.files[0]); } catch {}
+  } else if (S.fontLoaded && S.fontName) {
+    fontFileName = $('font-name').textContent || null;
+    // fontData unavailable — file already processed, no re-read possible without input
+  }
+
+  const preset = { name: nameVal, settings, fontData, fontFileName };
+  const presets = loadPresetsFromStorage();
+  const existing = presets.findIndex(p => p.name === nameVal);
+
+  if (existing >= 0) {
+    if (!confirm(`Пресет «${nameVal}» уже существует. Перезаписать?`)) return;
+    presets[existing] = preset;
+  } else {
+    presets.push(preset);
+  }
+
+  try {
+    savePresetsToStorage(presets);
+    $('preset-name-input').value = '';
+    renderPresetsList();
+    showMsg('preset-msg', `✓ Пресет «${nameVal}» сохранён${fontData ? ' со шрифтом' : fontFileName ? ' (шрифт нужно выбрать вручную — файл слишком большой для хранения)' : ''}`, 'ok');
+  } catch(e) {
+    // localStorage quota — retry without fontData
+    preset.fontData = null;
+    if (existing >= 0) presets[existing] = preset; else presets[presets.length - 1] = preset;
+    try {
+      savePresetsToStorage(presets);
+      $('preset-name-input').value = '';
+      renderPresetsList();
+      showMsg('preset-msg', `✓ Пресет «${nameVal}» сохранён без шрифта (файл слишком большой для хранения в браузере)`, 'warn');
+    } catch { showMsg('preset-msg', 'Не удалось сохранить — хранилище браузера переполнено', 'err'); }
+  }
+}
+
+async function applyPreset(idx) {
+  const presets = loadPresetsFromStorage();
+  const p = presets[idx]; if (!p) return;
+  applySettingsObj(p.settings);
+
+  if (p.fontData) {
+    try {
+      // Re-load font from stored base64
+      const resp = await fetch(p.fontData);
+      const buf = await resp.arrayBuffer();
+      const fontName = 'SLF_' + Date.now();
+      const ff = new FontFace(fontName, buf);
+      await ff.load(); document.fonts.add(ff);
+      S.fontLoaded = true; S.fontName = fontName;
+      $('font-name').textContent = p.fontFileName || 'из пресета';
+      $('font-status').innerHTML = `<div class="msg msg-ok">✓ Шрифт загружен из пресета: ${p.fontFileName || ''}</div>`;
+    } catch(e) {
+      $('font-status').innerHTML = `<div class="msg msg-warn">Не удалось загрузить шрифт из пресета: ${e.message}</div>`;
+    }
+  } else if (p.fontFileName) {
+    $('font-status').innerHTML = `<div class="msg msg-warn">Настройки применены. Шрифт «${p.fontFileName}» нужно выбрать вручную кнопкой выше.</div>`;
+  }
+
+  showMsg('preset-msg', `✓ Пресет «${p.name}» применён`, 'ok');
+}
+
+function deletePreset(idx) {
+  const presets = loadPresetsFromStorage();
+  const name = presets[idx]?.name;
+  if (!confirm(`Удалить пресет «${name}»?`)) return;
+  presets.splice(idx, 1);
+  savePresetsToStorage(presets);
+  renderPresetsList();
+}
+
+// Init on load
+renderPresetsList();
+
+function showMsg(id, text, type) {
+  const m = { ok:'msg-ok', err:'msg-err', inf:'msg-inf', warn:'msg-warn' };
+  $(id).innerHTML = `<div class="msg ${m[type]||'msg-inf'}">${text}</div>`;
+}
+function clearMsg(id) { $(id).innerHTML = ''; }
+</script>
+</body>
+</html>
