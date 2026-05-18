@@ -164,6 +164,50 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
 .focal-active-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);text-align:center;margin-top:8px}
 .focal-active-label span{color:var(--acc2)}
 
+
+
+/* Compact input padding overrides */
+.csg input[type=number], .csg input[type=text], .csg select {
+  padding: 6px 7px;
+  font-size: 13px;
+}
+.csg select { padding: 6px 5px; }
+.inline-param-row input[type=number],
+.inline-param-row input[type=text] {
+  padding: 6px 6px;
+  font-size: 13px;
+}
+.ipr-fields {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+/* Compact font settings */
+.font-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.font-row-name{font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.csg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 10px;margin-bottom:10px}
+.csg-item{display:flex;flex-direction:column;gap:4px}
+.csg-label{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:var(--txt3)}
+.csg-ctrl{display:flex;align-items:center;gap:4px}
+.csg-unit{font-size:11px;color:var(--txt3);font-family:'DM Mono',monospace;flex-shrink:0}
+.inline-param-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:7px 0;border-top:1px solid var(--brd)}
+.inline-param-row:last-child{padding-bottom:0}
+.ipr-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--txt3);width:54px;flex-shrink:0}
+.ipr-check{display:flex;align-items:center;gap:5px;cursor:pointer}
+.ipr-sep{font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3)}
+/* Focal tabs */
+.focal-tabs{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.focal-tab{background:var(--s2);border:1px solid var(--brd);border-radius:6px;color:var(--txt3);font-family:'DM Mono',monospace;font-size:11px;padding:5px 10px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.focal-tab:hover{border-color:var(--brd2);color:var(--txt)}
+.focal-tab.active{border-color:var(--acc);background:var(--acc3);color:var(--acc2)}
+.focal-canvas-wrap{display:flex;justify-content:center;margin-bottom:10px}
+/* Screenshot chip delete */
+.chip-del{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:14px;line-height:1;padding:0 0 0 4px;flex-shrink:0;transition:color .12s}
+.chip-del:hover{color:var(--err)}
+
 /* Collapsible cards */
 .card-head{cursor:pointer;margin-bottom:0;user-select:none}
 .card-head:hover .card-title{color:var(--acc2)}
@@ -245,98 +289,82 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
     <div id="preset-msg"></div>
   </div>
 
-  <div class="field">
-    <label class="lbl">Файл шрифта (.ttf / .otf / .woff / .woff2)</label>
-    <!-- FIXED: button triggers hidden input — no z-index/positioning bugs -->
-    <input type="file" id="font-input" class="file-hidden" accept=".ttf,.otf,.woff,.woff2" onchange="loadFont(this)">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <button class="btn btn-ghost" onclick="document.getElementById('font-input').click()">📂 Выбрать шрифт</button>
-      <span id="font-name" style="font-size:12px;color:var(--txt3);font-family:'DM Mono',monospace;"></span>
-    </div>
+  <!-- Font file row -->
+  <input type="file" id="font-input" class="file-hidden" accept=".ttf,.otf,.woff,.woff2" onchange="loadFont(this)">
+  <div class="font-row">
+    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('font-input').click()">📂 Шрифт</button>
+    <span id="font-name" class="font-row-name">не выбран</span>
     <div id="font-status"></div>
   </div>
-  <div class="row">
-    <div class="field">
-      <label class="lbl">Размер (px)</label>
-      <input type="number" id="fs-size" value="36" min="6" max="400">
+
+  <!-- Compact settings grid -->
+  <div class="csg">
+    <div class="csg-item">
+      <div class="csg-label">Размер</div>
+      <div class="csg-ctrl"><input type="number" id="fs-size" value="36" min="6" max="400" style="width:62px"> <span class="csg-unit">px</span></div>
     </div>
-    <div class="field">
-      <label class="lbl">Жирность</label>
-      <select id="fs-weight">
-        <option value="300">Light 300</option>
-        <option value="400" selected>Regular 400</option>
-        <option value="500">Medium 500</option>
-        <option value="600">SemiBold 600</option>
-        <option value="700">Bold 700</option>
-        <option value="800">ExtraBold 800</option>
-        <option value="900">Black 900</option>
-      </select>
+    <div class="csg-item">
+      <div class="csg-label">Жирность</div>
+      <div class="csg-ctrl">
+        <select id="fs-weight" style="width:100%">
+          <option value="300">Light</option>
+          <option value="400" selected>Regular</option>
+          <option value="500">Medium</option>
+          <option value="600">SemiBold</option>
+          <option value="700">Bold</option>
+          <option value="800">ExtraBold</option>
+          <option value="900">Black</option>
+        </select>
+      </div>
     </div>
-    <div class="field">
-      <label class="lbl">Цвет текста</label>
-      <div class="color-row">
+    <div class="csg-item">
+      <div class="csg-label">Цвет</div>
+      <div class="csg-ctrl color-row">
         <input type="color" id="fc-color" value="#ffffff">
-        <input type="text" id="fc-hex" value="#ffffff" maxlength="9">
+        <input type="text" id="fc-hex" value="#ffffff" maxlength="9" style="width:76px">
       </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="field">
-      <label class="lbl">Выравнивание</label>
-      <div class="align-group">
-        <button class="align-btn" data-a="left" onclick="setAlign('left')">⬅ Лево</button>
-        <button class="align-btn on" data-a="center" onclick="setAlign('center')">≡ Центр</button>
-        <button class="align-btn" data-a="right" onclick="setAlign('right')">Право ➡</button>
-      </div>
-    </div>
-    <div class="field">
-      <label class="lbl">Макс. ширина (px, 0=авто)</label>
-      <input type="number" id="fs-maxw" value="0" min="0">
-    </div>
-    <div class="field">
-      <label class="lbl">Межстрочный</label>
-      <input type="number" id="fs-lh" value="1.3" min="0.5" max="5" step="0.1">
-    </div>
-  </div>
-  <div class="sec-sub">Обводка (Stroke)</div>
-  <div class="row">
-    <div class="field">
-      <label class="lbl">Толщина (px)</label>
-      <input type="number" id="st-w" value="0" min="0" max="60">
-    </div>
-    <div class="field">
-      <label class="lbl">Цвет обводки</label>
-      <div class="color-row">
-        <input type="color" id="st-color" value="#000000">
-        <input type="text" id="st-hex" value="#000000" maxlength="9">
-      </div>
-    </div>
-  </div>
-  <div class="sec-sub">Тень (Drop Shadow)</div>
-  <div class="field">
-    <label class="check-field">
-      <input type="checkbox" id="sh-on" checked>
-      <span>Включить тень</span>
-    </label>
-  </div>
-  <div id="sh-settings">
-    <div class="row" style="margin-bottom:12px;">
-      <div class="field">
-        <label class="lbl">Цвет тени</label>
-        <div class="color-row">
-          <input type="color" id="sh-color" value="#000000">
-          <input type="text" id="sh-hex" value="#000000" maxlength="9">
+    <div class="csg-item">
+      <div class="csg-label">Выравн.</div>
+      <div class="csg-ctrl">
+        <div class="align-group" style="width:100%">
+          <button class="align-btn" data-a="left" onclick="setAlign('left')">L</button>
+          <button class="align-btn on" data-a="center" onclick="setAlign('center')">C</button>
+          <button class="align-btn" data-a="right" onclick="setAlign('right')">R</button>
         </div>
       </div>
-      <div class="field">
-        <label class="lbl">Непрозрачность %</label>
-        <input type="number" id="sh-opacity" value="75" min="0" max="100">
-      </div>
     </div>
-    <div class="row">
-      <div class="field"><label class="lbl">Смещение X</label><input type="number" id="sh-x" value="2"></div>
-      <div class="field"><label class="lbl">Смещение Y</label><input type="number" id="sh-y" value="2"></div>
-      <div class="field"><label class="lbl">Размытие (blur)</label><input type="number" id="sh-blur" value="6" min="0"></div>
+    <div class="csg-item">
+      <div class="csg-label">Макс. ш.</div>
+      <div class="csg-ctrl"><input type="number" id="fs-maxw" value="0" min="0" style="width:68px"> <span class="csg-unit">px</span></div>
+    </div>
+    <div class="csg-item">
+      <div class="csg-label">Интерл.</div>
+      <div class="csg-ctrl"><input type="number" id="fs-lh" value="1.3" min="0.5" max="5" step="0.1" style="width:60px"></div>
+    </div>
+  </div>
+
+  <!-- Stroke inline row -->
+  <div class="inline-param-row">
+    <span class="ipr-label">Обводка</span>
+    <input type="number" id="st-w" value="0" min="0" max="60" style="width:44px"> <span class="csg-unit">px</span>
+    <input type="color" id="st-color" value="#000000">
+    <input type="text" id="st-hex" value="#000000" maxlength="9" style="width:76px">
+  </div>
+
+  <!-- Shadow inline row -->
+  <div class="inline-param-row">
+    <label class="ipr-check">
+      <input type="checkbox" id="sh-on" checked>
+      <span class="ipr-label">Тень</span>
+    </label>
+    <div id="sh-settings" class="ipr-fields" style="display:flex">
+      <input type="color" id="sh-color" value="#000000">
+      <input type="text" id="sh-hex" value="#000000" maxlength="9" style="width:76px">
+      <input type="number" id="sh-opacity" value="75" min="0" max="100" style="width:50px"> <span class="csg-unit">%</span>
+      <span class="ipr-sep">X</span><input type="number" id="sh-x" value="2" style="width:50px">
+      <span class="ipr-sep">Y</span><input type="number" id="sh-y" value="2" style="width:50px">
+      <span class="ipr-sep">B</span><input type="number" id="sh-blur" value="6" min="0" style="width:50px">
     </div>
   </div>
 </div>
@@ -367,27 +395,41 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
     <div class="step">4</div>
     <div>
       <div class="card-title">Позиция текста</div>
-      <div class="card-sub">Кликните чтобы выбрать точку вставки</div>
+      <div class="card-sub">Независимая точка для каждого формата</div>
     </div>
   </div>
 
-  <!-- 4 independent focal frames, one per format -->
-  <div class="focal-row" id="focal-row"></div>
+  <!-- Format tabs -->
+  <div class="focal-tabs">
+    <button class="focal-tab active" data-key="iOS 19.5:9" onclick="switchFocalTab(this)">iOS 19.5:9</button>
+    <button class="focal-tab" data-key="iOS 4:3" onclick="switchFocalTab(this)">iOS 4:3</button>
+    <button class="focal-tab" data-key="And 16:9" onclick="switchFocalTab(this)">Android 16:9</button>
+    <button class="focal-tab" data-key="And 2.05:1" onclick="switchFocalTab(this)">Android 2:1</button>
+    <button class="btn-tiny" style="margin-left:auto;flex-shrink:0" onclick="copyFocalToAll()" title="Скопировать текущую позицию на все форматы">→ все</button>
+  </div>
 
-  <!-- X/Y manual inputs -->
+  <!-- Single canvas -->
+  <div class="focal-canvas-wrap">
+    <div class="focal-frame" id="focal-frame-main">
+      <div class="focal-grid">
+        <div class="fg-h" style="top:33.3%"></div><div class="fg-h" style="top:66.6%"></div>
+        <div class="fg-v" style="left:33.3%"></div><div class="fg-v" style="left:66.6%"></div>
+      </div>
+      <div class="focal-presets" id="focal-presets-main"></div>
+      <div class="focal-pin" id="focal-pin-main">
+        <div class="focal-pin-ring"></div>
+        <div class="focal-pin-dot"></div>
+        <div class="focal-pin-h"></div>
+        <div class="focal-pin-v"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- XY inputs -->
   <div class="focal-xy">
-    <div class="focal-xy-group">
-      <label>X</label>
-      <input type="number" id="fi-x-inp" min="0" max="100" step="1" value="50" oninput="focalInputChange()">
-      <label>%</label>
-    </div>
-    <div class="focal-xy-group">
-      <label>Y</label>
-      <input type="number" id="fi-y-inp" min="0" max="100" step="1" value="50" oninput="focalInputChange()">
-      <label>%</label>
-    </div>
+    <div class="focal-xy-group"><label>X</label><input type="number" id="fi-x-inp" min="0" max="100" step="1" value="50" oninput="focalInputChange()"><label>%</label></div>
+    <div class="focal-xy-group"><label>Y</label><input type="number" id="fi-y-inp" min="0" max="100" step="1" value="50" oninput="focalInputChange()"><label>%</label></div>
   </div>
-  <div class="focal-active-label">активный формат: <span id="focal-active-key">—</span></div>
 </div>
 
 <!-- STEP 5 -->
@@ -456,7 +498,7 @@ function syncC(ci, hi) {
   h.addEventListener('input', () => { if (/^#[0-9a-fA-F]{6}$/.test(h.value.trim())) c.value = h.value.trim(); });
 }
 syncC('fc-color','fc-hex'); syncC('st-color','st-hex'); syncC('sh-color','sh-hex');
-$('sh-on').addEventListener('change', function() { $('sh-settings').style.display = this.checked ? '' : 'none'; });
+$('sh-on').addEventListener('change', function() { $('sh-settings').style.display = this.checked ? 'flex' : 'none'; });
 function setAlign(a) { S.textAlign = a; document.querySelectorAll('.align-btn').forEach(b => b.classList.toggle('on', b.dataset.a === a)); }
 
 /* ═══════ FILE → DATA URL (FIXED: FileReader, no createObjectURL issues) ═══════ */
@@ -624,174 +666,137 @@ async function loadScreenshots(input) {
     } catch(e) { console.warn('Не удалось загрузить:', f.name, e); }
   }
 
+  renderScreenshotsList();
+}
+
+function renderScreenshotsList() {
   const list = $('ss-list'); list.innerHTML = '';
   for (const [pfx, items] of S.screenshots) {
     items.forEach(item => {
       const chip = document.createElement('div'); chip.className = 'chip';
-      chip.innerHTML = `<span class="chip-pfx">${pfx}</span><span class="chip-name" title="${item.name}">${item.name}</span>`;
+      const pfxEl = document.createElement('span'); pfxEl.className = 'chip-pfx'; pfxEl.textContent = pfx;
+      const nameEl = document.createElement('span'); nameEl.className = 'chip-name'; nameEl.title = item.name; nameEl.textContent = item.name;
+      const del = document.createElement('button'); del.className = 'chip-del'; del.textContent = '×'; del.title = 'Удалить';
+      del.onclick = () => {
+        const arr = S.screenshots.get(pfx);
+        if (!arr) return;
+        const i = arr.findIndex(f => f.name === item.name);
+        if (i >= 0) arr.splice(i, 1);
+        if (arr.length === 0) S.screenshots.delete(pfx);
+        renderScreenshotsList();
+      };
+      chip.append(pfxEl, nameEl, del);
       list.appendChild(chip);
     });
   }
+  if (!S.screenshots.size) list.innerHTML = '';
 }
 
-/* ═══════ FOCAL POINT PICKER — multi-format ═══════ */
+/* ═══════ FOCAL POINT PICKER — tab + single canvas ═══════ */
 (function initFocal() {
-  // Formats: label, heightRatio/widthRatio (so height = width * ratio)
-  // User notation "19.5:9" = height 19.5 / width 9 in portrait
   const FORMATS = [
-    { key: 'iOS 19.5:9',  hw: 19.5/9,  group: 'iOS'     },
-    { key: 'iOS 4:3',     hw: 4/3,     group: 'iOS'     },
-    { key: 'And 16:9',    hw: 16/9,    group: 'Android' },
-    { key: 'And 2.05:1',  hw: 2.05,    group: 'Android' },
+    { key: 'iOS 19.5:9', hw: 19.5/9 },
+    { key: 'iOS 4:3',    hw: 4/3    },
+    { key: 'And 16:9',   hw: 16/9   },
+    { key: 'And 2.05:1', hw: 2.05   },
   ];
+  const FRAME_W = 130;
+  const PRESETS = [[0.5,0.15],[0.5,0.5],[0.5,0.85],[0.2,0.33],[0.8,0.33],[0.2,0.66],[0.8,0.66]];
 
-  // Per-format positions
   S.focalPositions = {};
   FORMATS.forEach(f => S.focalPositions[f.key] = { x: 0.5, y: 0.5 });
   let activeKey = FORMATS[0].key;
 
-  // Preset snap points
-  const PRESETS = [
-    [0.5, 0.15], [0.5, 0.5], [0.5, 0.85],
-    [0.2, 0.33], [0.8, 0.33], [0.2, 0.66], [0.8, 0.66],
-  ];
+  function activePos() { return S.focalPositions[activeKey] || { x: 0.5, y: 0.5 }; }
 
-  function buildFrame(fmt) {
-    const frameW = 72;
-    const frameH = Math.round(frameW * fmt.hw);
+  function updateFrame() {
+    const frame = $('focal-frame-main'); if (!frame) return;
+    const fmt = FORMATS.find(f => f.key === activeKey) || FORMATS[0];
+    frame.style.height = Math.round(FRAME_W * fmt.hw) + 'px';
+  }
 
-    const col = document.createElement('div');
-    col.className = 'focal-col';
+  function updatePin() {
+    const pin = $('focal-pin-main'); if (!pin) return;
+    const pos = activePos();
+    pin.style.left = (pos.x * 100) + '%';
+    pin.style.top  = (pos.y * 100) + '%';
+    const xi = $('fi-x-inp'), yi = $('fi-y-inp');
+    if (xi) xi.value = Math.round(pos.x * 100);
+    if (yi) yi.value = Math.round(pos.y * 100);
+    S.textPos = pos;
+    const pp = $('focal-presets-main');
+    if (pp) pp.querySelectorAll('.fp').forEach(fp => fp.classList.toggle('active-fp',
+      Math.abs(parseFloat(fp.dataset.x)-pos.x)<0.02 && Math.abs(parseFloat(fp.dataset.y)-pos.y)<0.02));
+  }
 
-    const lbl = document.createElement('div');
-    lbl.className = 'focal-col-label';
-    lbl.textContent = fmt.key;
+  function setPos(x, y) {
+    S.focalPositions[activeKey] = { x, y };
+    S.textPos = { x, y };
+    updatePin();
+  }
 
-    const frame = document.createElement('div');
-    frame.className = 'focal-frame' + (fmt.key === activeKey ? ' active' : '');
-    frame.style.height = frameH + 'px';
-    frame.dataset.key = fmt.key;
+  window.switchFocalTab = function(btn) {
+    document.querySelectorAll('.focal-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeKey = btn.dataset.key;
+    updateFrame();
+    updatePin();
+  };
 
-    // Grid
-    const grid = document.createElement('div');
-    grid.className = 'focal-grid';
-    ['33.3%','66.6%'].forEach(p => {
-      const h = document.createElement('div'); h.className='fg-h'; h.style.top=p; grid.appendChild(h);
-      const v = document.createElement('div'); v.className='fg-v'; v.style.left=p; grid.appendChild(v);
+  window.copyFocalToAll = function() {
+    const pos = { ...activePos() };
+    FORMATS.forEach(f => S.focalPositions[f.key] = { ...pos });
+    updatePin();
+  };
+
+  window._focalUpdateAll = updatePin;
+
+  window.focalInputChange = function() {
+    setPos(
+      Math.max(0, Math.min(100, parseInt($('fi-x-inp').value)||0)) / 100,
+      Math.max(0, Math.min(100, parseInt($('fi-y-inp').value)||0)) / 100
+    );
+  };
+
+  window.getFocalForAspect = function(imgW, imgH) {
+    // Landscape images: use active format's position
+    if (imgW > imgH * 1.2) return S.focalPositions[activeKey] || { x: 0.5, y: 0.5 };
+    const imgHW = imgH / imgW;
+    let bestKey = FORMATS[0].key, bestDiff = Infinity;
+    FORMATS.forEach(f => {
+      const d = Math.abs(f.hw - imgHW);
+      if (d < bestDiff) { bestDiff = d; bestKey = f.key; }
     });
+    // If no close match, fall back to active
+    if (bestDiff > 0.5) return S.focalPositions[activeKey] || { x: 0.5, y: 0.5 };
+    return S.focalPositions[bestKey] || { x: 0.5, y: 0.5 };
+  };
 
-    // Preset dots
-    const presets = document.createElement('div');
-    presets.className = 'focal-presets';
+  setTimeout(() => {
+    const frame = $('focal-frame-main'); if (!frame) return;
+    frame.style.width = FRAME_W + 'px';
+
+    // Build preset dots
+    const pp = $('focal-presets-main');
     PRESETS.forEach(([px,py]) => {
       const dot = document.createElement('div');
-      dot.className = 'fp';
+      dot.className = 'fp'; dot.dataset.x = px; dot.dataset.y = py;
       dot.style.left = (px*100)+'%'; dot.style.top = (py*100)+'%';
-      dot.dataset.x = px; dot.dataset.y = py;
-      dot.title = 'Быстрая точка';
-      dot.addEventListener('click', e => {
-        e.stopPropagation();
-        setPos(fmt.key, px, py);
-      });
-      presets.appendChild(dot);
+      dot.addEventListener('click', e => { e.stopPropagation(); setPos(px, py); });
+      pp.appendChild(dot);
     });
-
-    // Pin
-    const pin = document.createElement('div');
-    pin.className = 'focal-pin';
-    pin.id = 'pin-' + fmt.key.replace(/[^a-z0-9]/gi,'_');
-    pin.innerHTML = '<div class="focal-pin-ring"></div><div class="focal-pin-dot"></div><div class="focal-pin-h"></div><div class="focal-pin-v"></div>';
-
-    frame.append(grid, presets, pin);
 
     // Click on frame
     frame.addEventListener('click', e => {
       const r = frame.getBoundingClientRect();
-      const rx = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
-      const ry = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
-      setPos(fmt.key, rx, ry);
+      setPos(
+        Math.max(0, Math.min(1, (e.clientX-r.left)/r.width)),
+        Math.max(0, Math.min(1, (e.clientY-r.top)/r.height))
+      );
     });
 
-    col.append(lbl, frame);
-    return { col, frame, pin };
-  }
-
-  const frameRefs = {};
-
-  function setPos(key, x, y) {
-    activeKey = key;
-    S.focalPositions[key] = { x, y };
-    S.textPos = { x, y }; // keep backward compat
-    updateAllPins();
-    updateInputs();
-    updateActiveFrames();
-  }
-
-  function updateAllPins() {
-    FORMATS.forEach(fmt => {
-      const el = frameRefs[fmt.key];
-      if (!el) return;
-      const pos = S.focalPositions[fmt.key];
-      el.pin.style.left = (pos.x * 100) + '%';
-      el.pin.style.top  = (pos.y * 100) + '%';
-      // preset dots highlight
-      el.frame.querySelectorAll('.fp').forEach(fp => {
-        fp.classList.toggle('active-fp',
-          Math.abs(parseFloat(fp.dataset.x)-pos.x) < 0.02 &&
-          Math.abs(parseFloat(fp.dataset.y)-pos.y) < 0.02);
-      });
-    });
-  }
-
-  function updateActiveFrames() {
-    FORMATS.forEach(fmt => {
-      const el = frameRefs[fmt.key];
-      if (el) el.frame.classList.toggle('active', fmt.key === activeKey);
-    });
-    const lbl = $('focal-active-key');
-    if (lbl) lbl.textContent = activeKey;
-  }
-
-  function updateInputs() {
-    const pos = S.focalPositions[activeKey];
-    const xi = $('fi-x-inp'), yi = $('fi-y-inp');
-    if (xi) xi.value = Math.round(pos.x * 100);
-    if (yi) yi.value = Math.round(pos.y * 100);
-  }
-
-  window._focalUpdateAll = updateAllPins;
-  window.focalInputChange = function() {
-    const x = Math.max(0, Math.min(100, parseInt($('fi-x-inp').value)||0)) / 100;
-    const y = Math.max(0, Math.min(100, parseInt($('fi-y-inp').value)||0)) / 100;
-    S.focalPositions[activeKey] = { x, y };
-    S.textPos = { x, y };
-    updateAllPins();
-    updateActiveFrames();
-  };
-
-  // Get focal pos for a given image aspect ratio
-  window.getFocalForAspect = function(imgW, imgH) {
-    const imgHW = imgH / imgW; // height/width ratio of image
-    let bestKey = FORMATS[0].key, bestDiff = Infinity;
-    FORMATS.forEach(f => {
-      const diff = Math.abs(f.hw - imgHW);
-      if (diff < bestDiff) { bestDiff = diff; bestKey = f.key; }
-    });
-    return S.focalPositions[bestKey] || { x: 0.5, y: 0.5 };
-  };
-
-  // Build UI
-  setTimeout(() => {
-    const row = $('focal-row');
-    if (!row) return;
-    FORMATS.forEach(fmt => {
-      const refs = buildFrame(fmt);
-      frameRefs[fmt.key] = refs;
-      row.appendChild(refs.col);
-    });
-    updateAllPins();
-    updateInputs();
-    updateActiveFrames();
+    updateFrame();
+    updatePin();
   }, 0);
 })();
 
