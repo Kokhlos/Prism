@@ -185,6 +185,144 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
   flex: 1;
 }
 
+
+/* Two-column layout removed */
+}
+/* Screenshot thumbnails */
+.ss-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.ss-thumb-card {
+  background: var(--s2);
+  border: 1px solid var(--brd);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  transition: border-color .15s;
+  width: 72px;
+  flex-shrink: 0;
+}
+.ss-thumb-card:hover { border-color: var(--brd2); }
+.ss-thumb-img {
+  width: 72px;
+  height: 90px;
+  display: block;
+  object-fit: contain;
+  background: #0a0a10;
+}
+.ss-thumb-meta {
+  padding: 4px 6px 5px;
+}
+.ss-thumb-name {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  color: var(--txt3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+.ss-thumb-pfx {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: var(--acc);
+  color: #fff;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  line-height: 1.4;
+}
+.ss-thumb-del {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  background: rgba(0,0,0,.65);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .12s;
+  padding: 0;
+}
+.ss-thumb-del:hover { background: var(--err); }
+
+
+/* Focal dot matrix */
+.fgrid-wrap {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+.fgrid-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 64px;
+  max-width: 100px;
+}
+.fgrid-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--txt3);
+  text-align: center;
+  line-height: 1.3;
+  white-space: pre;
+}
+.fgrid-screen {
+  width: 100%;
+  position: relative;
+  background: linear-gradient(160deg, #0d0d1a, #111120);
+  border: 1px solid var(--brd2);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,.4);
+  transition: border-color .15s;
+}
+.fgrid-screen:hover { border-color: rgba(108,99,255,.4); }
+.fgrid-inner {
+  position: absolute;
+  inset: 0;
+}
+.fgrid-dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  border: 1.5px solid rgba(255,255,255,.2);
+  cursor: pointer;
+  transition: background .12s, border-color .12s, transform .12s;
+  padding: 0;
+}
+.fgrid-dot:hover {
+  background: rgba(108,99,255,.5);
+  border-color: var(--acc2);
+  transform: translate(-50%, -50%) scale(1.4);
+}
+.fgrid-dot.selected {
+  background: var(--acc);
+  border-color: var(--acc2);
+  box-shadow: 0 0 0 3px rgba(108,99,255,.25), 0 0 8px rgba(108,99,255,.5);
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
 /* Compact font settings */
 .font-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .font-row-name{font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -213,7 +351,7 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
 .card-head:hover .card-title{color:var(--acc2)}
 .card-chevron{margin-left:auto;color:var(--txt3);font-size:11px;transition:transform .25s ease;flex-shrink:0;width:18px;text-align:center}
 .card.collapsed .card-chevron{transform:rotate(-90deg)}
-.card-body{overflow:hidden;max-height:4000px;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .25s ease,padding .25s ease;padding-top:20px;opacity:1}
+.card-body{overflow:hidden;max-height:60000px;transition:max-height .6s cubic-bezier(.4,0,.2,1),opacity .25s ease,padding .25s ease;padding-top:20px;opacity:1}
 .card.collapsed .card-body{max-height:0;opacity:0;padding-top:0;pointer-events:none}
 </style>
 <script>
@@ -240,13 +378,32 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
   <div class="card-head">
     <div class="step">1</div>
     <div>
+      <div class="card-title">Скриншоты</div>
+      <div class="card-sub">Имя файла начинается с числа = ключ строки в таблице</div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--txt3);margin-bottom:14px;font-family:'DM Mono',monospace;line-height:1.9;">
+    <span style="color:var(--acc2)">1_banner.png</span> → строка 1 &nbsp;·&nbsp;
+    <span style="color:var(--acc2)">2_home.png</span> → строка 2 &nbsp;·&nbsp;
+    <span style="color:var(--acc2)">3_features.png</span> → строка 3
+  </div>
+  <input type="file" id="ss-input" class="file-hidden" accept="image/png,image/jpeg,image/webp" multiple onchange="loadScreenshots(this)">
+  <button class="btn btn-ghost" onclick="document.getElementById('ss-input').click()">🖼️ Выбрать скриншоты</button>
+  <div class="ss-grid" id="ss-list"></div>
+</div>
+
+<!-- STEP 2 -->
+<div class="card">
+  <div class="card-head">
+    <div class="step">2</div>
+    <div>
       <div class="card-title">Источник переводов</div>
       <div class="card-sub">Вставьте данные из Google Sheets или загрузите через URL</div>
     </div>
   </div>
   <div class="field">
     <label class="lbl">Вставьте данные (TSV из Sheets — Ctrl+A → Ctrl+C → Ctrl+V)</label>
-    <textarea id="csv-paste" rows="6" placeholder="Вставьте ячейки из Google Sheets…"></textarea>
+    <textarea id="csv-paste" rows="5" placeholder="Вставьте ячейки из Google Sheets…"></textarea>
   </div>
   <button class="btn" onclick="parseManual()">✓ Применить данные</button>
   <div class="or">или загрузите через URL</div>
@@ -262,16 +419,17 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
   <div id="sheet-preview-wrap"></div>
 </div>
 
-<!-- STEP 2 -->
+<!-- STEP 3 -->
 <div class="card">
   <div class="card-head">
-    <div class="step">2</div>
+    <div class="step">3</div>
     <div>
       <div class="card-title">Шрифт и параметры текста</div>
       <div class="card-sub">TTF/OTF + стиль, обводка, тень</div>
     </div>
   </div>
-  <!-- PRESETS -->
+
+  <!-- Presets -->
   <div class="presets-wrap">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div class="presets-title" style="margin-bottom:0;">💾 Пресеты</div>
@@ -289,7 +447,7 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
     <div id="preset-msg"></div>
   </div>
 
-  <!-- Font file row -->
+  <!-- Font file -->
   <input type="file" id="font-input" class="file-hidden" accept=".ttf,.otf,.woff,.woff2" onchange="loadFont(this)">
   <div class="font-row">
     <button class="btn btn-ghost btn-sm" onclick="document.getElementById('font-input').click()">📂 Шрифт</button>
@@ -344,15 +502,15 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
     </div>
   </div>
 
-  <!-- Stroke inline row -->
+  <!-- Stroke inline -->
   <div class="inline-param-row">
     <span class="ipr-label">Обводка</span>
-    <input type="number" id="st-w" value="0" min="0" max="60" style="width:44px"> <span class="csg-unit">px</span>
+    <input type="number" id="st-w" value="0" min="0" max="60" style="width:50px"> <span class="csg-unit">px</span>
     <input type="color" id="st-color" value="#000000">
     <input type="text" id="st-hex" value="#000000" maxlength="9" style="width:76px">
   </div>
 
-  <!-- Shadow inline row -->
+  <!-- Shadow inline -->
   <div class="inline-param-row">
     <label class="ipr-check">
       <input type="checkbox" id="sh-on" checked>
@@ -369,66 +527,22 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
   </div>
 </div>
 
-<!-- STEP 3 -->
-<div class="card">
-  <div class="card-head">
-    <div class="step">3</div>
-    <div>
-      <div class="card-title">Скриншоты</div>
-      <div class="card-sub">Имя файла начинается с числа = ключ строки в таблице</div>
-    </div>
-  </div>
-  <div style="font-size:11px;color:var(--txt3);margin-bottom:14px;font-family:'DM Mono',monospace;line-height:1.9;">
-    <span style="color:var(--acc2)">1_1080x1920.png</span> → строка с ключом 1 &nbsp;·&nbsp;
-    <span style="color:var(--acc2)">2_home.png</span> → ключ 2 &nbsp;·&nbsp;
-    <span style="color:var(--acc2)">3_features.png</span> → ключ 3
-  </div>
-  <!-- FIXED: button triggers hidden input -->
-  <input type="file" id="ss-input" class="file-hidden" accept="image/png,image/jpeg,image/webp" multiple onchange="loadScreenshots(this)">
-  <button class="btn btn-ghost" onclick="document.getElementById('ss-input').click()">🖼️ Выбрать скриншоты (мультивыбор)</button>
-  <div class="file-list" id="ss-list"></div>
-</div>
-
 <!-- STEP 4 -->
 <div class="card">
   <div class="card-head">
     <div class="step">4</div>
     <div>
       <div class="card-title">Позиция текста</div>
-      <div class="card-sub">Независимая точка для каждого формата</div>
+      <div class="card-sub">Выберите зону для каждого формата</div>
     </div>
   </div>
 
-  <!-- Format tabs -->
-  <div class="focal-tabs">
-    <button class="focal-tab active" data-key="iOS 19.5:9" onclick="switchFocalTab(this)">iOS 19.5:9</button>
-    <button class="focal-tab" data-key="iOS 4:3" onclick="switchFocalTab(this)">iOS 4:3</button>
-    <button class="focal-tab" data-key="And 16:9" onclick="switchFocalTab(this)">Android 16:9</button>
-    <button class="focal-tab" data-key="And 2.05:1" onclick="switchFocalTab(this)">Android 2:1</button>
-    <button class="btn-tiny" style="margin-left:auto;flex-shrink:0" onclick="copyFocalToAll()" title="Скопировать текущую позицию на все форматы">→ все</button>
+  <div class="fgrid-wrap" id="fgrid-wrap">
+    <!-- Filled by JS: 4 format columns, each with 3×5 dot matrix -->
   </div>
 
-  <!-- Single canvas -->
-  <div class="focal-canvas-wrap">
-    <div class="focal-frame" id="focal-frame-main">
-      <div class="focal-grid">
-        <div class="fg-h" style="top:33.3%"></div><div class="fg-h" style="top:66.6%"></div>
-        <div class="fg-v" style="left:33.3%"></div><div class="fg-v" style="left:66.6%"></div>
-      </div>
-      <div class="focal-presets" id="focal-presets-main"></div>
-      <div class="focal-pin" id="focal-pin-main">
-        <div class="focal-pin-ring"></div>
-        <div class="focal-pin-dot"></div>
-        <div class="focal-pin-h"></div>
-        <div class="focal-pin-v"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- XY inputs -->
-  <div class="focal-xy">
-    <div class="focal-xy-group"><label>X</label><input type="number" id="fi-x-inp" min="0" max="100" step="1" value="50" oninput="focalInputChange()"><label>%</label></div>
-    <div class="focal-xy-group"><label>Y</label><input type="number" id="fi-y-inp" min="0" max="100" step="1" value="50" oninput="focalInputChange()"><label>%</label></div>
+  <div style="margin-top:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+    <button class="btn-tiny" onclick="copyFocalToAll()" title="Скопировать позицию активного формата на все остальные">→ скопировать на все форматы</button>
   </div>
 </div>
 
@@ -448,7 +562,7 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
       <button class="btn-tiny" onclick="selAllLangs(false)">Снять всё</button>
     </div>
     <div class="lang-grid" id="lang-grid">
-      <div style="color:var(--txt3);font-size:12px;">Загрузите данные из таблицы (шаг 1)</div>
+      <div style="color:var(--txt3);font-size:12px;">Загрузите данные из таблицы (шаг 2)</div>
     </div>
   </div>
   <div class="prog-bar hidden" id="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
@@ -476,6 +590,8 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:point
 </div>
 
 </main>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 /* ═══════ STATE ═══════ */
@@ -671,12 +787,24 @@ async function loadScreenshots(input) {
 
 function renderScreenshotsList() {
   const list = $('ss-list'); list.innerHTML = '';
+  if (!S.screenshots.size) return;
   for (const [pfx, items] of S.screenshots) {
     items.forEach(item => {
-      const chip = document.createElement('div'); chip.className = 'chip';
-      const pfxEl = document.createElement('span'); pfxEl.className = 'chip-pfx'; pfxEl.textContent = pfx;
-      const nameEl = document.createElement('span'); nameEl.className = 'chip-name'; nameEl.title = item.name; nameEl.textContent = item.name;
-      const del = document.createElement('button'); del.className = 'chip-del'; del.textContent = '×'; del.title = 'Удалить';
+      const card = document.createElement('div'); card.className = 'ss-thumb-card';
+
+      const img = document.createElement('img'); img.className = 'ss-thumb-img';
+      img.src = item.dataUrl; img.alt = item.name;
+
+      const pfxEl = document.createElement('div'); pfxEl.className = 'ss-thumb-pfx';
+      pfxEl.textContent = pfx;
+
+      const meta = document.createElement('div'); meta.className = 'ss-thumb-meta';
+      const nameEl = document.createElement('span'); nameEl.className = 'ss-thumb-name';
+      nameEl.textContent = item.name; nameEl.title = item.name;
+      meta.appendChild(nameEl);
+
+      const del = document.createElement('button'); del.className = 'ss-thumb-del';
+      del.innerHTML = '&times;'; del.title = 'Удалить';
       del.onclick = () => {
         const arr = S.screenshots.get(pfx);
         if (!arr) return;
@@ -685,119 +813,148 @@ function renderScreenshotsList() {
         if (arr.length === 0) S.screenshots.delete(pfx);
         renderScreenshotsList();
       };
-      chip.append(pfxEl, nameEl, del);
-      list.appendChild(chip);
+
+      card.append(img, pfxEl, meta, del);
+      list.appendChild(card);
     });
   }
-  if (!S.screenshots.size) list.innerHTML = '';
 }
 
-/* ═══════ FOCAL POINT PICKER — tab + single canvas ═══════ */
+/* ═══════ FOCAL POINT PICKER — 3×5 dot matrix ═══════ */
 (function initFocal() {
   const FORMATS = [
-    { key: 'iOS 19.5:9', hw: 19.5/9 },
-    { key: 'iOS 4:3',    hw: 4/3    },
-    { key: 'And 16:9',   hw: 16/9   },
-    { key: 'And 2.05:1', hw: 2.05   },
+    { key: 'iOS 19.5:9', hw: 19.5/9,  label: 'iOS\n19.5:9' },
+    { key: 'iOS 4:3',    hw: 4/3,     label: 'iOS\n4:3'     },
+    { key: 'Android 16:9',   hw: 16/9,    label: 'Android\n16:9'    },
+    { key: 'Android 2.05:1', hw: 1/2.05,  label: 'Android\n2.05:1'  },
   ];
-  const FRAME_W = 130;
-  const PRESETS = [[0.5,0.15],[0.5,0.5],[0.5,0.85],[0.2,0.33],[0.8,0.33],[0.2,0.66],[0.8,0.66]];
 
+  // 3 columns × 5 rows = 15 preset positions
+  const COLS = 3, ROWS = 5;
+  const POSITIONS = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      POSITIONS.push({
+        x: c === 0 ? 0.2 : c === 1 ? 0.5 : 0.8,
+        y: r === 0 ? 0.1 : r === 1 ? 0.3 : r === 2 ? 0.5 : r === 3 ? 0.7 : 0.9,
+      });
+    }
+  }
+
+  // Per-format: store selected position index (default = index 7 = center)
   S.focalPositions = {};
-  FORMATS.forEach(f => S.focalPositions[f.key] = { x: 0.5, y: 0.5 });
-  let activeKey = FORMATS[0].key;
+  S.focalIndex = {};
+  FORMATS.forEach(f => {
+    S.focalIndex[f.key] = 13; // bottom-center x50 y90
+    S.focalPositions[f.key] = { ...POSITIONS[13] };
+  });
 
-  function activePos() { return S.focalPositions[activeKey] || { x: 0.5, y: 0.5 }; }
+  const FRAME_W = 52; // px width of each mini-screen
 
-  function updateFrame() {
-    const frame = $('focal-frame-main'); if (!frame) return;
-    const fmt = FORMATS.find(f => f.key === activeKey) || FORMATS[0];
-    frame.style.height = Math.round(FRAME_W * fmt.hw) + 'px';
+  function closestIndex(pos) {
+    let best = 0, bestD = Infinity;
+    POSITIONS.forEach((p, i) => {
+      const d = Math.abs(p.x - pos.x) + Math.abs(p.y - pos.y);
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    return best;
   }
 
-  function updatePin() {
-    const pin = $('focal-pin-main'); if (!pin) return;
-    const pos = activePos();
-    pin.style.left = (pos.x * 100) + '%';
-    pin.style.top  = (pos.y * 100) + '%';
-    const xi = $('fi-x-inp'), yi = $('fi-y-inp');
-    if (xi) xi.value = Math.round(pos.x * 100);
-    if (yi) yi.value = Math.round(pos.y * 100);
-    S.textPos = pos;
-    const pp = $('focal-presets-main');
-    if (pp) pp.querySelectorAll('.fp').forEach(fp => fp.classList.toggle('active-fp',
-      Math.abs(parseFloat(fp.dataset.x)-pos.x)<0.02 && Math.abs(parseFloat(fp.dataset.y)-pos.y)<0.02));
-  }
+  function buildFormatCol(fmt) {
+    const col = document.createElement('div');
+    col.className = 'fgrid-col';
 
-  function setPos(x, y) {
-    S.focalPositions[activeKey] = { x, y };
-    S.textPos = { x, y };
-    updatePin();
-  }
+    // Label
+    const lbl = document.createElement('div');
+    lbl.className = 'fgrid-label';
+    lbl.textContent = fmt.key;
 
-  window.switchFocalTab = function(btn) {
-    document.querySelectorAll('.focal-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeKey = btn.dataset.key;
-    updateFrame();
-    updatePin();
-  };
+    // Mini screen silhouette
+    const screen = document.createElement('div');
+    screen.className = 'fgrid-screen';
+    screen.style.paddingTop = Math.round(100 * fmt.hw) + '%'; // aspect ratio trick
+
+    const inner = document.createElement('div');
+    inner.className = 'fgrid-inner';
+
+    // Dot grid
+    POSITIONS.forEach((pos, idx) => {
+      const dot = document.createElement('button');
+      dot.className = 'fgrid-dot';
+      dot.style.left = (pos.x * 100) + '%';
+      dot.style.top  = (pos.y * 100) + '%';
+      dot.dataset.idx = idx;
+      dot.dataset.key = fmt.key;
+      dot.title = `X: ${Math.round(pos.x*100)}%  Y: ${Math.round(pos.y*100)}%`;
+
+      // Mark selected
+      if (idx === S.focalIndex[fmt.key]) dot.classList.add('selected');
+
+      dot.addEventListener('click', () => {
+        S.focalIndex[fmt.key] = idx;
+        S.focalPositions[fmt.key] = { ...pos };
+        S.textPos = { ...pos }; // compat
+        // Update dot states for this column
+        inner.querySelectorAll('.fgrid-dot').forEach(d => {
+          d.classList.toggle('selected', parseInt(d.dataset.idx) === idx);
+        });
+      });
+
+      inner.appendChild(dot);
+    });
+
+    screen.appendChild(inner);
+    col.append(lbl, screen);
+    return col;
+  }
 
   window.copyFocalToAll = function() {
-    const pos = { ...activePos() };
-    FORMATS.forEach(f => S.focalPositions[f.key] = { ...pos });
-    updatePin();
+    // Find the format that has most recent interaction — use first active one
+    // Just copy all to match the first format
+    const ref = S.focalPositions[FORMATS[0].key];
+    const refIdx = S.focalIndex[FORMATS[0].key];
+    FORMATS.forEach(f => {
+      S.focalPositions[f.key] = { ...ref };
+      S.focalIndex[f.key] = refIdx;
+    });
+    // Re-render
+    buildAll();
   };
 
-  window._focalUpdateAll = updatePin;
-
-  window.focalInputChange = function() {
-    setPos(
-      Math.max(0, Math.min(100, parseInt($('fi-x-inp').value)||0)) / 100,
-      Math.max(0, Math.min(100, parseInt($('fi-y-inp').value)||0)) / 100
-    );
+  // Expose for preset restore
+  window._focalUpdateAll = function() {
+    // Recalculate indexes from positions
+    FORMATS.forEach(f => {
+      if (S.focalPositions[f.key]) {
+        S.focalIndex[f.key] = closestIndex(S.focalPositions[f.key]);
+      }
+    });
+    buildAll();
   };
+
+  function buildAll() {
+    const wrap = $('fgrid-wrap'); if (!wrap) return;
+    wrap.innerHTML = '';
+    FORMATS.forEach(fmt => wrap.appendChild(buildFormatCol(fmt)));
+  }
 
   window.getFocalForAspect = function(imgW, imgH) {
-    // Landscape images: use active format's position
-    if (imgW > imgH * 1.2) return S.focalPositions[activeKey] || { x: 0.5, y: 0.5 };
+    if (imgW > imgH * 1.2) return S.focalPositions[FORMATS[0].key] || { x: 0.5, y: 0.5 };
     const imgHW = imgH / imgW;
     let bestKey = FORMATS[0].key, bestDiff = Infinity;
     FORMATS.forEach(f => {
       const d = Math.abs(f.hw - imgHW);
       if (d < bestDiff) { bestDiff = d; bestKey = f.key; }
     });
-    // If no close match, fall back to active
-    if (bestDiff > 0.5) return S.focalPositions[activeKey] || { x: 0.5, y: 0.5 };
+    if (bestDiff > 0.5) return S.focalPositions[FORMATS[0].key] || { x: 0.5, y: 0.5 };
     return S.focalPositions[bestKey] || { x: 0.5, y: 0.5 };
   };
 
-  setTimeout(() => {
-    const frame = $('focal-frame-main'); if (!frame) return;
-    frame.style.width = FRAME_W + 'px';
+  // Also clean up old focal state keys in presets
+  window.switchFocalTab = function() {}; // noop for compat
+  window.focalInputChange = function() {}; // noop
 
-    // Build preset dots
-    const pp = $('focal-presets-main');
-    PRESETS.forEach(([px,py]) => {
-      const dot = document.createElement('div');
-      dot.className = 'fp'; dot.dataset.x = px; dot.dataset.y = py;
-      dot.style.left = (px*100)+'%'; dot.style.top = (py*100)+'%';
-      dot.addEventListener('click', e => { e.stopPropagation(); setPos(px, py); });
-      pp.appendChild(dot);
-    });
-
-    // Click on frame
-    frame.addEventListener('click', e => {
-      const r = frame.getBoundingClientRect();
-      setPos(
-        Math.max(0, Math.min(1, (e.clientX-r.left)/r.width)),
-        Math.max(0, Math.min(1, (e.clientY-r.top)/r.height))
-      );
-    });
-
-    updateFrame();
-    updatePin();
-  }, 0);
+  setTimeout(buildAll, 0);
 })();
 
 /* ═══════ LANGS ═══════ */
@@ -926,7 +1083,8 @@ async function generateAll() {
       ctx.drawImage(img, 0, 0);
       const fpos = (window.getFocalForAspect ? getFocalForAspect(img.width, img.height) : S.textPos);
       drawText(ctx, t.text, fpos.x * img.width, fpos.y * img.height, settings);
-      S.results.push({ name: t.outName, canvas, lang: t.lang });
+      const _du = canvas.toDataURL('image/png');
+      S.results.push({ name: t.outName, canvas, lang: t.lang, dataUrl: _du });
     } catch(e) {
       errors.push(`${t.name}: ${e.message}`);
       console.error('Ошибка генерации:', t.name, e);
@@ -951,8 +1109,8 @@ function renderResults() {
   const card = $('results-card'), grid = $('results-grid');
   card.classList.remove('hidden'); grid.innerHTML = '';
   $('results-count').textContent = `${S.results.length} изображений`;
-  S.results.forEach(({ name, canvas }) => {
-    const dataUrl = canvas.toDataURL('image/png');
+  S.results.forEach(({ name, canvas, dataUrl: _storedUrl }) => {
+    const dataUrl = _storedUrl || canvas.toDataURL('image/png');
     const item = document.createElement('div'); item.className = 'res-item';
     const thumb = document.createElement('img'); thumb.className = 'res-thumb'; thumb.src = dataUrl; thumb.alt = name;
     const meta = document.createElement('div'); meta.className = 'res-meta';
